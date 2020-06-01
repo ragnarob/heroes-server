@@ -1,0 +1,5 @@
+.env
+package-lock.json
+public/*
+node_modules
+games.json
