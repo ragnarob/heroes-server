@@ -37,11 +37,13 @@ module.exports = {
     let totalStats = this.calculateTotalStats(games)
     let playerStats = this.calculatePlayerStats(games)
     let recentGames = this.getMostRecentGames(games)
+    let teamStats = this.calculateTeamStats(games)
 
     res.json({
       'totalStats': totalStats,
       'playerStats': playerStats,
-      'recentGames': recentGames
+      'recentGames': recentGames,
+      'teamStats': teamStats
     })
   },
 
@@ -107,6 +109,34 @@ module.exports = {
     stats.winRate = round(stats.wins / stats.games, 2)
 
     return stats
+  },
+
+  calculateTeamStats (allGames) {
+    let allTeams = []
+
+    for (let game of allGames) {
+      let gamePlayersString = gameToTeam(game)
+      let team = allTeams.find(t => t.playersString === gamePlayersString)
+      if (!team) {
+        allTeams.push({playersString: gamePlayersString, players: game.team.map(player => player.name), games: 0, wins: 0})
+        team = allTeams.find(t => t.playersString === gamePlayersString)
+      }
+
+      team.games++
+      if (game.result === 1) { team.wins++ }
+    }
+
+    for (let team of allTeams) {
+      team.winPercent = percent(team.wins / team.games)
+    }
+
+    allTeams.sort((t1, t2) => t1.winPercent > t2.winPercent ? -1 : 1)
+  
+    return allTeams
+
+    function gameToTeam (game) {
+      return game.team.map(player => player.name).sort().join(', ')
+    }
   },
 
   calculatePlayerStats (allGames) {
