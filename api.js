@@ -11,13 +11,18 @@ module.exports = {
 
   async addGame (req, res, next) {
     let [password, gameData] = [req.body.password, req.body.gameData]
-    if (password !== process.env.PASSWORD) {
+    if (password !== 'Orphea') {
       res.end('Wrong password provided')
       return
     }
 
     let allGames = await this.readGamesContent()
     allGames.push(gameData)
+
+    if (gameData.team.length < 2 || gameData.team.length > 5) {
+      res.end('Number of players must be between 2-5!')
+      return
+    }
 
     for (let player of gameData.team) {
       player.kills = Number(player.kills)
