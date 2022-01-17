@@ -9,7 +9,7 @@ module.exports = {
     app.post('/games', this.addGame.bind(this))
   },
 
-  async addGame (req, res, next) {
+  async addGame (req, res) {
     let [password, gameData] = [req.body.password, req.body.gameData]
     if (password !== 'Orphea') {
       res.end('Wrong password provided')
@@ -36,8 +36,13 @@ module.exports = {
     })
   },
 
-  async getGames (req, res, next) {
+  async getGames (req, res) {
     let games = await this.readGamesContent()
+
+    let gameTypeFilter = req.query.gameType
+    if (gameTypeFilter) {
+      games = games.filter(g => g.gameType === gameTypeFilter)
+    }
 
     let totalStats = this.calculateTotalStats(games)
     let playerStats = this.calculatePlayerStats(games)
@@ -262,7 +267,7 @@ module.exports = {
     })
   },
 
-  async getLegalValues (req, res, next) {
+  async getLegalValues (req, res) {
     fs.readFile('./legal-values.json', (err, data) => {
       if (err) { return [] }
 
