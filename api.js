@@ -11,7 +11,7 @@ module.exports = {
 
   async addGame(req, res) {
     let [password, gameData] = [req.body.password, req.body.gameData]
-    if (password !== 'Orphea') {
+    if (password !== 'o') {
       res.end('Wrong password provided')
       return
     }
