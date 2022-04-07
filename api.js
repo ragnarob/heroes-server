@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 module.exports = {
-  setupRoutes () {
+  setupRoutes() {
     app.get('/games', this.getGames.bind(this))
 
     app.get('/legal-values', this.getLegalValues.bind(this))
@@ -9,7 +9,7 @@ module.exports = {
     app.post('/games', this.addGame.bind(this))
   },
 
-  async addGame (req, res) {
+  async addGame(req, res) {
     let [password, gameData] = [req.body.password, req.body.gameData]
     if (password !== 'Orphea') {
       res.end('Wrong password provided')
@@ -36,7 +36,7 @@ module.exports = {
     })
   },
 
-  async getGames (req, res) {
+  async getGames(req, res) {
     let games = await this.readGamesContent()
 
     let gameTypeFilter = req.query.gameType
@@ -57,30 +57,30 @@ module.exports = {
     })
   },
 
-  getMostRecentGames (allGames) {
+  getMostRecentGames(allGames) {
     for (let game of allGames) {
       game.date = new Date(game.date)
     }
     allGames.sort((g1, g2) => g1.date > g2.date ? -1 : 1)
 
-    return allGames.slice(0, 10)
+    return allGames.slice(0, 20)
   },
 
-  calculateTotalStats (allGames) {
+  calculateTotalStats(allGames) {
     let stats = {
       'games': 0,
       'wins': 0,
       'losses': 0,
-      'winratesByPlayerCounts': {2: {games: 0, wins: 0}, 3: {games: 0, wins: 0}, 4: {games: 0, wins: 0}, 5: {games: 0, wins: 0}},
-      'winRatesByGameType': {'QM': {games: 0, wins: 0}, 'Draft': {games: 0, wins: 0}, 'Ranked': {games: 0, wins: 0}},
-      'winRatesByMap': {'Alterac Pass': {games: 0, wins: 0}, 'Battlefield of Eternity': {games: 0, wins: 0}, 'Blackheart\'s Bay': {games: 0, wins: 0}, 'Braxis Holdout': {games: 0, wins: 0}, 'Cursed Hollow': {games: 0, wins: 0}, 'Dragon Shire': {games: 0, wins: 0}, 'Garden of Terror': {games: 0, wins: 0}, 'Hanamura': {games: 0, wins: 0}, 'Haunted Mines': {games: 0, wins: 0}, 'Infernal Shrines': {games: 0, wins: 0}, 'Sky Temple': {games: 0, wins: 0}, 'Tomb of the Spider Queen': {games: 0, wins: 0}, 'Towers of Chromie': {games: 0, wins: 0}, 'Volskaya Foundry': {games: 0, wins: 0}, 'Orphea Junction': {games: 0, wins: 0}},
+      'winratesByPlayerCounts': { 2: { games: 0, wins: 0 }, 3: { games: 0, wins: 0 }, 4: { games: 0, wins: 0 }, 5: { games: 0, wins: 0 } },
+      'winRatesByGameType': { 'QM': { games: 0, wins: 0 }, 'Draft': { games: 0, wins: 0 }, 'Ranked': { games: 0, wins: 0 } },
+      'winRatesByMap': { 'Alterac Pass': { games: 0, wins: 0 }, 'Battlefield of Eternity': { games: 0, wins: 0 }, 'Blackheart\'s Bay': { games: 0, wins: 0 }, 'Braxis Holdout': { games: 0, wins: 0 }, 'Cursed Hollow': { games: 0, wins: 0 }, 'Dragon Shire': { games: 0, wins: 0 }, 'Garden of Terror': { games: 0, wins: 0 }, 'Hanamura': { games: 0, wins: 0 }, 'Haunted Mines': { games: 0, wins: 0 }, 'Infernal Shrines': { games: 0, wins: 0 }, 'Sky Temple': { games: 0, wins: 0 }, 'Tomb of the Spider Queen': { games: 0, wins: 0 }, 'Towers of Chromie': { games: 0, wins: 0 }, 'Volskaya Foundry': { games: 0, wins: 0 }, 'Orphea Junction': { games: 0, wins: 0 } },
     }
 
     for (let game of allGames) {
       let isWin = game.result === 1
       stats.games++
-      
-      if (isWin) { stats.wins++ } 
+
+      if (isWin) { stats.wins++ }
       else { stats.losses++ }
 
       let playerCount = game.team.length
@@ -102,7 +102,8 @@ module.exports = {
         newWinRatesByMap.push({
           'map': mapName,
           'games': stats.winRatesByMap[mapName].games,
-          'winRate': percent(stats.winRatesByMap[mapName].wins / stats.winRatesByMap[mapName].games)})
+          'winRate': percent(stats.winRatesByMap[mapName].wins / stats.winRatesByMap[mapName].games)
+        })
       }
     }
     newWinRatesByMap.sort((m1, m2) => m1.games > m2.games ? -1 : 1)
@@ -121,14 +122,14 @@ module.exports = {
     return stats
   },
 
-  calculateTeamStats (allGames) {
+  calculateTeamStats(allGames) {
     let allTeams = []
 
     for (let game of allGames) {
       let gamePlayersString = gameToTeam(game)
       let team = allTeams.find(t => t.playersString === gamePlayersString)
       if (!team) {
-        allTeams.push({playersString: gamePlayersString, players: game.team.map(player => player.name), games: 0, wins: 0})
+        allTeams.push({ playersString: gamePlayersString, players: game.team.map(player => player.name), games: 0, wins: 0 })
         team = allTeams.find(t => t.playersString === gamePlayersString)
       }
 
@@ -141,15 +142,15 @@ module.exports = {
     }
 
     allTeams.sort((t1, t2) => t1.winPercent > t2.winPercent ? -1 : 1)
-  
+
     return allTeams
 
-    function gameToTeam (game) {
+    function gameToTeam(game) {
       return game.team.map(player => player.name).sort().join(', ')
     }
   },
 
-  calculatePlayerStats (allGames) {
+  calculatePlayerStats(allGames) {
     let allPlayerStats = {}
 
     for (let game of allGames) {
@@ -179,9 +180,9 @@ module.exports = {
         playerHero.games++
         if (isWin) { playerHero.wins++ }
 
-        playerHero.avgKills = (playerHero.avgKills * (playerHero.games-1) + playerGame.kills) / playerHero.games
-        playerHero.avgDeaths = (playerHero.avgDeaths * (playerHero.games-1) + playerGame.deaths) / playerHero.games
-        playerHero.avgAssists = (playerHero.avgAssists * (playerHero.games-1) + playerGame.assists) / playerHero.games
+        playerHero.avgKills = (playerHero.avgKills * (playerHero.games - 1) + playerGame.kills) / playerHero.games
+        playerHero.avgDeaths = (playerHero.avgDeaths * (playerHero.games - 1) + playerGame.deaths) / playerHero.games
+        playerHero.avgAssists = (playerHero.avgAssists * (playerHero.games - 1) + playerGame.assists) / playerHero.games
       }
     }
 
@@ -194,9 +195,9 @@ module.exports = {
       player.avgKills = round(player.kills / player.games, 1)
       player.avgAssists = round(player.assists / player.games, 1)
       player.avgDeaths = round(player.deaths / player.games, 1)
-      player.avgKD = round(player.avgKills/player.avgDeaths, 1)
-      player.avgKAD = round((player.avgKills+player.avgAssists)/player.avgDeaths, 1)
-      
+      player.avgKD = round(player.avgKills / player.avgDeaths, 1)
+      player.avgKAD = round((player.avgKills + player.avgAssists) / player.avgDeaths, 1)
+
       for (let hero of player.heroes) {
         hero.winRate = percent(hero.wins / hero.games)
         hero.avgKills = round(hero.avgKills, 1)
@@ -215,7 +216,7 @@ module.exports = {
       for (let playerAward of Object.keys(player.awards)) {
         if (player.awards[playerAward] === 0) { continue }
         else {
-          newPlayerAwards.push({'award': playerAward, 'percentage': percent(player.awards[playerAward] / player.games)})
+          newPlayerAwards.push({ 'award': playerAward, 'percentage': percent(player.awards[playerAward] / player.games) })
           totalNumAwards += player.awards[playerAward]
         }
       }
@@ -227,12 +228,12 @@ module.exports = {
 
     return allPlayerStats
 
-    function createNewPlayer (name) {
+    function createNewPlayer(name) {
       return {
         'name': name,
         'games': 0,
         'wins': 0,
-        'awards': {'MVP': 0, 'Avenger': 0, 'Bulwark': 0, 'Clutch Healer': 0, 'Combat Medic': 0, 'Daredevil': 0, 'Dominator': 0, 'Escape Artist': 0, 'Experienced': 0, 'Finisher': 0, 'Guardian': 0, 'HatTrick': 0, 'Headhunter': 0, 'Main Healer': 0, 'Painbringer': 0, 'Protector': 0, 'Scrapper': 0, 'Siege Master': 0, 'Silencer': 0, 'Sole Survivor': 0, 'Stunner': 0, 'Team Player': 0, 'Trapper': 0, 'Map-specific': 0},
+        'awards': { 'MVP': 0, 'Avenger': 0, 'Bulwark': 0, 'Clutch Healer': 0, 'Combat Medic': 0, 'Daredevil': 0, 'Dominator': 0, 'Escape Artist': 0, 'Experienced': 0, 'Finisher': 0, 'Guardian': 0, 'HatTrick': 0, 'Headhunter': 0, 'Main Healer': 0, 'Painbringer': 0, 'Protector': 0, 'Scrapper': 0, 'Siege Master': 0, 'Silencer': 0, 'Sole Survivor': 0, 'Stunner': 0, 'Team Player': 0, 'Trapper': 0, 'Map-specific': 0 },
         'heroes': {},
         'avgKills': 0,
         'avgDeaths': 0,
@@ -243,7 +244,7 @@ module.exports = {
       }
     }
 
-    function createHero (heroName) {
+    function createHero(heroName) {
       return {
         'name': heroName,
         'games': 0,
@@ -255,7 +256,7 @@ module.exports = {
     }
   },
 
-  async readGamesContent () {
+  async readGamesContent() {
     return new Promise((resolve, reject) => {
       fs.readFile('./games.json', (err, data) => {
         if (err) { return [] }
@@ -267,7 +268,7 @@ module.exports = {
     })
   },
 
-  async getLegalValues (req, res) {
+  async getLegalValues(req, res) {
     fs.readFile('./legal-values.json', (err, data) => {
       if (err) { return [] }
 
@@ -278,9 +279,9 @@ module.exports = {
   }
 }
 
-function round (number, decimals) {
+function round(number, decimals) {
   return (Math.round(number * 10 ** decimals)) / (10 ** decimals)
 }
-function percent (number) {
+function percent(number) {
   return Math.round(number * 100)
 }
