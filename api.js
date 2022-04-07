@@ -143,7 +143,7 @@ module.exports = {
 
     allTeams.sort((t1, t2) => t1.winPercent > t2.winPercent ? -1 : 1)
 
-    return allTeams
+    return allTeams.filter(t => t.games >= 4)
 
     function gameToTeam(game) {
       return game.team.map(player => player.name).sort().join(', ')
